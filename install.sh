@@ -91,13 +91,13 @@ download_release() {
   local tmp
 
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' RETURN
 
   echo "Downloading ${url}..."
   curl -fsSL "$url" -o "${tmp}/${archive}"
   tar -xzf "${tmp}/${archive}" -C "$tmp"
   mkdir -p "$INSTALL_DIR"
   install -m 0755 "${tmp}/pm-${platform}" "${INSTALL_DIR}/pm"
+  rm -rf "$tmp"
   echo "Installed pm to ${INSTALL_DIR}/pm"
 }
 
