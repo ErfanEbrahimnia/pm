@@ -7,6 +7,7 @@ import (
 	"github.com/ErfanEbrahimnia/pm/internal/detect"
 	"github.com/ErfanEbrahimnia/pm/internal/runner"
 	"github.com/ErfanEbrahimnia/pm/internal/use"
+	"github.com/ErfanEbrahimnia/pm/internal/version"
 )
 
 func main() {
@@ -16,7 +17,20 @@ func main() {
 	}
 }
 
+func isVersionFlag(arg string) bool {
+	switch arg {
+	case "--version", "-version", "-v":
+		return true
+	default:
+		return false
+	}
+}
+
 func run(args []string) error {
+	if len(args) > 0 && isVersionFlag(args[0]) {
+		return version.PrintStdout()
+	}
+
 	if len(args) > 0 && args[0] == "use" {
 		if len(args) > 1 {
 			return fmt.Errorf("pm use takes no arguments; run pm use to choose a package manager")

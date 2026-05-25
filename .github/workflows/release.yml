@@ -38,14 +38,16 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
+          VERSION: ${{ github.event.release.tag_name }}
         run: |
+          ldflags="-s -w -X github.com/ErfanEbrahimnia/pm/internal/version.Version=${VERSION}"
           name="pm-${GOOS}-${GOARCH}"
           if [ "$GOOS" = "windows" ]; then
-            go build -ldflags="-s -w" -o "${name}.exe" .
+            go build -ldflags="${ldflags}" -o "${name}.exe" .
             zip "${name}.zip" "${name}.exe"
             echo "archive=${name}.zip" >> "$GITHUB_ENV"
           else
-            go build -ldflags="-s -w" -o "$name" .
+            go build -ldflags="${ldflags}" -o "$name" .
             tar -czf "${name}.tar.gz" "$name"
             echo "archive=${name}.tar.gz" >> "$GITHUB_ENV"
           fi

@@ -18,6 +18,7 @@ pm                  # show detected manager
 pm install          # e.g. pnpm install
 pm run dev
 pm use              # pick a manager interactively
+pm --version        # show release version
 ```
 
 ## Install
