@@ -22,18 +22,18 @@ pm use              # pick a manager interactively
 
 ## Install
 
-**From a release** (macOS and Linux):
+**Install script** (macOS and Linux):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ErfanEbrahimnia/pm/main/install.sh | bash
 ```
 
-Installs to `~/.local/bin` and appends that directory to your `PATH` in `~/.zshrc` or `~/.bashrc`.
+Downloads a release binary and adds the install directory to your `PATH` in `~/.zshrc` or `~/.bashrc`.
 
 Options:
 
 ```bash
-PM_VERSION=v1.0.0 curl -fsSL .../install.sh | bash
+PM_VERSION=1.0.0-beta.0 curl -fsSL .../install.sh | bash
 INSTALL_DIR=/usr/local/bin curl -fsSL .../install.sh | bash
 ```
 

@@ -14,7 +14,7 @@ and add it to your PATH.
 
 Environment:
   PM_REPO       GitHub repository (default: ErfanEbrahimnia/pm)
-  PM_VERSION    Release tag, e.g. v1.0.0 (default: latest)
+  PM_VERSION    Release tag, e.g. 1.0.0-beta.0 (default: latest)
   INSTALL_DIR   Install location (default: ~/.local/bin)
 EOF
 }
@@ -50,13 +50,36 @@ detect_platform() {
   echo "${os}-${arch}"
 }
 
+tag_from_release_json() {
+  local body="$1"
+  if ! echo "$body" | grep -q '"tag_name"'; then
+    return 1
+  fi
+  echo "$body" | grep -E '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
+}
+
 resolve_version() {
   if [[ -n "$VERSION" ]]; then
     echo "$VERSION"
-    return
+    return 0
   fi
-  curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" |
-    grep -E '"tag_name"' | head -1 | sed -E 's/.*"([^"]+)".*/\1/'
+
+  local body tag
+
+  # /releases/latest omits pre-releases (404 when only prereleases exist).
+  body="$(curl -sSL "https://api.github.com/repos/${REPO}/releases/latest")"
+  if tag="$(tag_from_release_json "$body")" && [[ -n "$tag" ]]; then
+    echo "$tag"
+    return 0
+  fi
+
+  body="$(curl -sSL "https://api.github.com/repos/${REPO}/releases?per_page=1")"
+  if tag="$(tag_from_release_json "$body")" && [[ -n "$tag" ]]; then
+    echo "$tag"
+    return 0
+  fi
+
+  return 1
 }
 
 download_release() {
@@ -66,8 +89,9 @@ download_release() {
   local archive="pm-${platform}.tar.gz"
   local url="${base}/${archive}"
   local tmp
+
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' EXIT
+  trap 'rm -rf "$tmp"' RETURN
 
   echo "Downloading ${url}..."
   curl -fsSL "$url" -o "${tmp}/${archive}"
@@ -78,34 +102,41 @@ download_release() {
 }
 
 ensure_path() {
+  local dir="$1"
   case ":$PATH:" in
-    *":${INSTALL_DIR}:"*) return ;;
+    *":${dir}:"*) return ;;
   esac
 
-  local line="export PATH=\"${INSTALL_DIR}:\$PATH\""
+  local line="export PATH=\"${dir}:\$PATH\""
   local updated=0
 
   for profile in "${HOME}/.zshrc" "${HOME}/.bashrc"; do
-    if [[ -f "$profile" ]] && ! grep -qF "$INSTALL_DIR" "$profile"; then
+    if [[ -f "$profile" ]] && ! grep -qF "$dir" "$profile"; then
       printf '\n# pm\n%s\n' "$line" >>"$profile"
-      echo "Added ${INSTALL_DIR} to PATH in ${profile}"
+      echo "Added ${dir} to PATH in ${profile}"
       updated=1
     fi
   done
 
   if [[ "$updated" -eq 0 ]]; then
-    echo "Add ${INSTALL_DIR} to your PATH:"
+    echo "Add ${dir} to your PATH:"
     echo "  ${line}"
   fi
 }
 
 main() {
   local platform version
+
   platform="$(detect_platform)"
-  version="$(resolve_version)"
+
+  if ! version="$(resolve_version)"; then
+    echo "error: no GitHub release found at https://github.com/${REPO}/releases" >&2
+    exit 1
+  fi
+
   echo "Installing pm ${version} for ${platform}..."
   download_release "$platform" "$version"
-  ensure_path
+  ensure_path "$INSTALL_DIR"
   echo "Done. Restart your shell or run: export PATH=\"${INSTALL_DIR}:\$PATH\""
 }
 
