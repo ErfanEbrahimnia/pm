@@ -9,7 +9,7 @@ usage() {
   cat <<EOF
 Usage: install.sh
 
-Install pm from GitHub releases into INSTALL_DIR (default: ~/.local/bin)
+Install pm and pmx from GitHub releases into INSTALL_DIR (default: ~/.local/bin)
 and add it to your PATH.
 
 Environment:
@@ -97,8 +97,9 @@ download_release() {
   tar -xzf "${tmp}/${archive}" -C "$tmp"
   mkdir -p "$INSTALL_DIR"
   install -m 0755 "${tmp}/pm-${platform}" "${INSTALL_DIR}/pm"
+  install -m 0755 "${tmp}/pmx-${platform}" "${INSTALL_DIR}/pmx"
   rm -rf "$tmp"
-  echo "Installed pm to ${INSTALL_DIR}/pm"
+  echo "Installed pm and pmx to ${INSTALL_DIR}"
 }
 
 ensure_path() {

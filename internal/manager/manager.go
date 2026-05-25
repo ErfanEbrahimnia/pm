@@ -48,6 +48,28 @@ func (m Manager) Command() string {
 	return m.String()
 }
 
+// ExecSpec describes how to run one-off package binaries (npx, pnpx, bunx, yarn dlx).
+type ExecSpec struct {
+	Command string
+	Prefix  []string // prepended before user args (e.g. "dlx" for yarn)
+}
+
+// ExecSpec returns the command used to execute packages without a global install.
+func (m Manager) ExecSpec() (ExecSpec, error) {
+	switch m {
+	case Npm:
+		return ExecSpec{Command: "npx"}, nil
+	case Pnpm:
+		return ExecSpec{Command: "pnpx"}, nil
+	case Bun:
+		return ExecSpec{Command: "bunx"}, nil
+	case Yarn:
+		return ExecSpec{Command: "yarn", Prefix: []string{"dlx"}}, nil
+	default:
+		return ExecSpec{}, fmt.Errorf("unknown package manager")
+	}
+}
+
 // Parse recognizes a manager name (e.g. "pnpm", "PNPM").
 func Parse(s string) (Manager, error) {
 	switch strings.ToLower(strings.TrimSpace(s)) {

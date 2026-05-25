@@ -19,6 +19,10 @@ pm install          # e.g. pnpm install
 pm run dev
 pm use              # pick a manager interactively
 pm --version        # show release version
+
+pmx                 # show detected exec tool (npx, pnpx, bunx, yarn dlx)
+pmx vitest          # e.g. pnpx vitest
+pmx --version       # show pmx and exec tool version
 ```
 
 ## Install
@@ -51,6 +55,7 @@ export PATH="$(pwd)/.bin:$PATH"
 
 ```bash
 go install github.com/ErfanEbrahimnia/pm@latest
+go install github.com/ErfanEbrahimnia/pm/cmd/pmx@latest
 ```
 
 Prebuilt binaries for Linux and macOS (amd64 and arm64) are attached to each [GitHub release](https://github.com/ErfanEbrahimnia/pm/releases).

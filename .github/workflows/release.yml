@@ -41,15 +41,18 @@ jobs:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
           ldflags="-s -w -X github.com/ErfanEbrahimnia/pm/internal/version.Version=${VERSION}"
-          name="pm-${GOOS}-${GOARCH}"
+          pm_name="pm-${GOOS}-${GOARCH}"
+          pmx_name="pmx-${GOOS}-${GOARCH}"
           if [ "$GOOS" = "windows" ]; then
-            go build -ldflags="${ldflags}" -o "${name}.exe" .
-            zip "${name}.zip" "${name}.exe"
-            echo "archive=${name}.zip" >> "$GITHUB_ENV"
+            go build -ldflags="${ldflags}" -o "${pm_name}.exe" .
+            go build -ldflags="${ldflags}" -o "${pmx_name}.exe" ./cmd/pmx
+            zip "${pm_name}.zip" "${pm_name}.exe" "${pmx_name}.exe"
+            echo "archive=${pm_name}.zip" >> "$GITHUB_ENV"
           else
-            go build -ldflags="${ldflags}" -o "$name" .
-            tar -czf "${name}.tar.gz" "$name"
-            echo "archive=${name}.tar.gz" >> "$GITHUB_ENV"
+            go build -ldflags="${ldflags}" -o "$pm_name" .
+            go build -ldflags="${ldflags}" -o "$pmx_name" ./cmd/pmx
+            tar -czf "${pm_name}.tar.gz" "$pm_name" "$pmx_name"
+            echo "archive=${pm_name}.tar.gz" >> "$GITHUB_ENV"
           fi
 
       - uses: actions/upload-artifact@v4
